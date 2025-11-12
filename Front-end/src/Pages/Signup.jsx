@@ -13,7 +13,7 @@ function Signup() {
   const handleSignup = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch("http://localhost:4000/api/user/registerUser", {
+      const res = await fetch("https://lms-h4xz.onrender.com/api/user/registerUser", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, email, password }),

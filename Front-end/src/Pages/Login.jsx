@@ -15,7 +15,7 @@ function Login() {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch("http://localhost:4000/api/user/loginUser", {
+      const res = await fetch("https://lms-h4xz.onrender.com/api/user/loginUser", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
