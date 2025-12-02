@@ -32,7 +32,9 @@ const registerUser = async(req,res)=>{
 
      await newUser.save();
 
-     return res.status(201).json({success:true,message:'User added successfully',user:newUser})
+    const token = jwt.sign({id:newUser._id}, process.env.JWT_SECRET, { expiresIn: "7d" });
+
+    return res.status(201).json({success:true,message:'User added successfully',user:newUser,token})
 
 
    } catch (error) {
@@ -61,7 +63,11 @@ const LoginUser = async(req,res)=>{
         if(isMatch){
             // now we will send the token to the user 
             const token = jwt.sign({email},process.env.JWT_SECRET)
-            return res.status(201).json({success:true,token,user:isMatch})
+            return res.status(201).json({success:true,token,user: {
+                _id: userExist._id,
+                name: userExist.name,
+                email: userExist.email
+              }})
         }
         else{
             return res.json({success:false,message:'Invalid Credentials'})

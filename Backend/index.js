@@ -29,3 +29,4 @@ app.use('/api/user',userRouter)
 app.listen(process.env.PORT, () => {
   console.log("Server is running peacefully");
 });
+

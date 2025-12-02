@@ -14,6 +14,9 @@ import StudentsEnrolled from './Pages/educator/StudentsEnrolled'
 import Navbar from './Components/student/Navbar'
 import Login from './Pages/Login'
 import Signup from './Pages/Signup'
+import Footer from './Components/student/Footer'
+import "quill/dist/quill.snow.css";
+
 
 function App() {
 
@@ -39,8 +42,9 @@ function App() {
           <Route path='myCourses' element={<MyCourses/>}/>
           <Route path='studentEnrolled' element={<StudentsEnrolled/>}/>
         </Route>
-
+      
       </Routes>
+      <Footer/>
     </div>
   )
 }

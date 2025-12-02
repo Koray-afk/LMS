@@ -8,18 +8,20 @@ function Signup() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
-  const { login } = useContext(AppContext);
+  const { login , backend_Url } = useContext(AppContext);
 
   const handleSignup = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch("https://lms-h4xz.onrender.com/api/user/registerUser", {
+      console.log(backend_Url)
+      const res = await fetch(`${backend_Url}/api/user/registerUser`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, email, password }),
       });
 
       const data = await res.json();
+      console.log(data)
       if (!res.ok) throw new Error(data.message || "Signup failed");
 
       login(data.user, data.token);

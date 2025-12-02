@@ -1,12 +1,15 @@
 import React, { useContext } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { assets } from "../../assets/assets.js";
 import { AppContext } from "../../context/AppContext.jsx";
 
 function Navbar() {
   const location = useLocation();
+
   const isCourseListPage = location.pathname.includes("/courseList");
-  const { isAuthenticated, logout } = useContext(AppContext);
+  const { isAuthenticated, logout , isEducator } = useContext(AppContext);
+  const navigate = useNavigate()
+
 
   return (
     <div
@@ -16,7 +19,7 @@ function Navbar() {
           : "bg-blue-200 border-violet-300 shadow-sm"
       }`}
     >
-      <h1 className="text-2xl sm:text-3xl font-bold text-violet-700 cursor-pointer hover:text-violet-900 transition-all duration-300">
+      <h1 onClick={()=>navigate('/')} className="text-2xl sm:text-3xl font-bold text-violet-700 cursor-pointer hover:text-violet-900 transition-all duration-300">
         SkillSphere
       </h1>
 
@@ -24,8 +27,8 @@ function Navbar() {
       <div className="hidden md:flex items-center gap-6 text-gray-600 font-medium">
         {isAuthenticated ? (
           <>
-            <button className="hover:text-violet-700 transition-colors duration-200">
-              Become Educator
+            <button onClick={()=>navigate('/educator')} className="hover:text-violet-700 transition-colors duration-200">
+              {isEducator ? 'Educator Dashboard' : "Become Educator"}
             </button>
             <span className="text-gray-400">|</span>
             <Link
@@ -55,7 +58,9 @@ function Navbar() {
       <div className="md:hidden flex items-center gap-4 sm:gap-6 text-gray-600">
         {isAuthenticated ? (
           <>
-            <button className="hover:text-violet-700">Become Educator</button>
+             <button onClick={()=>navigate('/educator')} className="hover:text-violet-700 transition-colors duration-200">
+              {isEducator ? 'Educator Dashboard' : "Become Educator"}
+            </button>
             <span className="text-gray-400">|</span>
             <Link
               to="/myEnrollments"
