@@ -36,12 +36,13 @@ function App() {
         <Route path='/myEnrollments' element={<MyEnrollment/>}/>
         <Route path='/player/:courseId' element={<Player/>}/>
         <Route path='/loading/:path' element={<Loading/>}/>
-        <Route path='/educator' element={<Educator/>}>
-          <Route path='educator' element={<Dashboard/>}/>
-          <Route path='addCourses' element={<AddCourse/>}/>
-          <Route path='myCourses' element={<MyCourses/>}/>
-          <Route path='studentEnrolled' element={<StudentsEnrolled/>}/>
+        <Route path="/educator" element={<Educator />}>
+          <Route index element={<Dashboard />} />
+          <Route path="addCourse" element={<AddCourse />} />
+          <Route path="myCourses" element={<MyCourses />} />
+          <Route path="studentsEnrolled" element={<StudentsEnrolled />} />
         </Route>
+
       
       </Routes>
       <Footer/>

@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useContext } from "react";
 import { Link } from "react-router-dom";
+import { AppContext } from "../../context/AppContext";
 
 function Navbar() {
 
-  const user = null; // replace later
+  const { user } = useContext(AppContext)
 
   return (
     <div className="w-full h-16 bg-purple-100 flex justify-between items-center px-6 shadow-md">
@@ -15,10 +16,11 @@ function Navbar() {
 
       {/* RIGHT — USER */}
       <p className="text-gray-700 font-medium">
-        {user ? user.fullName : "Developers"}
+        {user ? user.name : "Educator"}
       </p>
     </div>
   );
 }
 
 export default Navbar;
+

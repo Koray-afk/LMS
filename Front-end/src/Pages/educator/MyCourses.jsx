@@ -4,7 +4,7 @@ import Loading from '../../Components/student/Loading'
 
 function MyCourses() {
 
-  const { allCourses } = useContext(AppContext)
+  const { allCourses,token,backend_Url } = useContext(AppContext)
   const [courses, setCourses] = useState(null)
 
   const fetchEducatorCourses = async () => {

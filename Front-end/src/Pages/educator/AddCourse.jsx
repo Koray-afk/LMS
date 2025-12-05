@@ -1,10 +1,15 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import Quill from "quill";
 import { assets } from "../../assets/assets";
+import { AppContext } from "../../context/AppContext";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+
 
 function AddCourse() {
   const quillRef = useRef(null);
   const editorRef = useRef(null);
+  const navigate = useNavigate()
 
   const [courseTitle, setCourseTitle] = useState("");
   const [coursePrice, setCoursePrice] = useState(0);
@@ -13,6 +18,7 @@ function AddCourse() {
   const [chapters, setChapters] = useState([]);
   const [showPopup, setShowPopup] = useState(false);
   const [currentChapterId, setCurrentChapterId] = useState(null);
+  const{token,backend_Url}=useContext(AppContext)
 
   const [lectureDetails, setLectureDetails] = useState({
     lectureTitle: "",
@@ -65,7 +71,7 @@ function AddCourse() {
         )
       }
   };
-
+  
   const addLectures = ()=>{
     setChapters(
       chapters.map((chapter)=>{
@@ -92,6 +98,38 @@ function AddCourse() {
 
   const handleSubmit = async(e)=>{
     e.preventDefault()
+    if(!image){
+      alert('Please provide a Thumbnail')
+      return 
+    } 
+
+    const courseDescription = quillRef.current.root.innerHTML
+
+    // Now we have to build course STructure similar to backend 
+    const courseData = {
+      courseTitle,
+      courseDescription,
+      coursePrice,
+      discount,
+      isPublished:true,
+      courseContent:chapters
+    }
+
+    try{
+      const formData = new FormData()
+      formData.append('courseData',JSON.stringify(courseData))
+      formData.append('image',image)
+
+      const response = axios.post(`${backend_Url}/api/educator/add-course`,formData,{headers:{Authorization:`Bearer ${token}`, "Content-Type": "multipart/form-data",}})
+
+      console.log("courseData-->",response.data)
+      alert('Course added Successfully')
+      navigate("/educator/myCourses");
+    }
+    catch(error){
+      console.log(error)
+      console.log(error.response?.data || error);
+    }
 
   }
 
@@ -322,7 +360,7 @@ function AddCourse() {
                       })
                     }
                     className="border rounded px-2 py-1"
-                    type="text"
+                    type="checkbox"
                     value={lectureDetails.isPreviewFree}
                   />
                 </div>

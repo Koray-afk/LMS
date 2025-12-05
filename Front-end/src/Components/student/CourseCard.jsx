@@ -3,7 +3,7 @@ import { AppContext } from '../../context/AppContext'
 import { Link } from 'react-router-dom'
 
 function CourseCard({ course }) {
-  const { currency , averageRating } = useContext(AppContext)
+  const { currency } = useContext(AppContext)
 
   const finalPrice = (course.coursePrice - (course.discount * course.coursePrice) / 100).toFixed(2)
 
@@ -31,7 +31,7 @@ function CourseCard({ course }) {
       <p className="text-sm text-gray-500">Koray Cerragil</p>
   
       <div className="flex items-center gap-2 text-sm text-yellow-500">
-        <p className="font-semibold">{averageRating(course)}</p>
+        <p className="font-semibold">4.5</p>
         <div>⭐⭐⭐⭐⭐</div>
         <p className="text-gray-500">(22)</p>
       </div>

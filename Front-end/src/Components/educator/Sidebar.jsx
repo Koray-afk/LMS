@@ -7,10 +7,10 @@ function Sidebar() {
   const { isEducator } = useContext(AppContext);
 
   const menuItems = [
-    { name: "Dashboard", path: "/educator/educator", icon: assets.home_icon },
-    { name: "Add Course", path: "/educator/addCourses", icon: assets.add_icon },
+    { name: "Dashboard", path: "/educator", icon: assets.home_icon },
+    { name: "Add Course", path: "/educator/addCourse", icon: assets.add_icon },
     { name: "My Courses", path: "/educator/myCourses", icon: assets.my_course_icon },
-    { name: "Student Enrolled", path: "/educator/studentEnrolled", icon: assets.person_tick_icon },
+    { name: "Student Enrolled", path: "/educator/studentsEnrolled", icon: assets.person_tick_icon },
   ];
 
   if (!isEducator) return null;

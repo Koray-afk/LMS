@@ -12,7 +12,6 @@ function CourseDetails() {
   // Correct context usage
   const {
     allCourses,
-    averageRating,
     calculateChapterTime,
     calculateCourseDuration,
     calculateTotalLectures,
@@ -61,7 +60,7 @@ function CourseDetails() {
         {/* Ratings */}
         <div className="flex items-center gap-3 mt-4 text-sm">
           <p className="font-semibold text-yellow-500 text-lg">
-            {averageRating(courseData)}
+            4.5
           </p>
           <span className="text-yellow-500 text-lg">⭐</span>
           <p className="text-gray-500">(22 ratings)</p>
@@ -199,7 +198,7 @@ function CourseDetails() {
 
         <div className="flex items-center gap-1">
           <span className="text-red-500 text-lg">★</span>
-          <span>{averageRating(courseData)}</span>
+          <span>4.5</span>
         </div>
 
         <div className="flex items-center gap-1">

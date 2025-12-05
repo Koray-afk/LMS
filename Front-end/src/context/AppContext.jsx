@@ -1,125 +1,171 @@
-// this is the context page where we will add common logic to the concepts 
-import { createContext, useState } from "react";
-export const AppContext = createContext()
-import { useEffect } from "react";
+import { createContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { dummyCourses } from "../assets/assets";
+import axios from "axios";
 import humanizeDuration from "humanize-duration";
+import { dummyCourses } from "../assets/assets";
+import { toast } from "react-toastify";
+
+export const AppContext = createContext();
+
+export const AppContextProvider = ({ children }) => {
+  const navigate = useNavigate();
+  const backend_Url = import.meta.env.VITE_BACKEND_URL;
+  const currency = import.meta.env.VITE_CURRENCY;
+
+  const [user, setUser] = useState(null);
+  const [token, setToken] = useState(localStorage.getItem("token") || null);
+  const [isEducator, setIsEducator] = useState(false);
+
+  const [allCourses, setAllCourses] = useState([]);
+  const [enrolledCourses, setEnrolledCourses] = useState([]);
+
+  // LOGIN
+
+  const login = (userData, jwtToken) => {
+    setUser(userData);
+    setToken(jwtToken);
+
+    localStorage.setItem("token", jwtToken);
+    localStorage.setItem("user", JSON.stringify(userData));
+
+    setIsEducator(userData?.role === "educator");
+
+    navigate("/");
+  };
 
 
+  // LOGOUT
 
-export const AppContextProvider = (props)=>{
+  const logout = () => {
+    setUser(null);
+    setToken(null);
+    setIsEducator(false);
 
-    const[user,setUser]=useState(null)
-    const[isEducator,setIsSducator]=useState(true)
-    const[token,setToken]=useState(localStorage.getItem("token") || null);
-    const navigate = useNavigate()
-    const backend_Url = import.meta.env.VITE_BACKEND_URL;
-    const currency = import.meta.env.VITE_CURRENCY  
-    const [enrolledCourse,setEnrolledCourses]=useState([])
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
 
-    const[allCourses,setAllCourses]=useState([])
+    navigate("/");
+  };
 
-    console.log(allCourses)
+  // BECOME EDUCATOR
 
-    //Login function 
-    const login =(userData,jwtToken)=>{
-        setUser(userData)
-        setToken(jwtToken)
-        localStorage.setItem('token',jwtToken)
-        localStorage.setItem('user',JSON.stringify(userData))
-        navigate('/')
-      
+  const becomeEducator = async () => {
+    try {
+      const response = await axios.post(
+        `${backend_Url}/api/educator/become-educator`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      console.log(response)
+      const newToken = response.data.token;
+
+      // Decode or manually update user role
+      const updatedUser = { ...user, role: "educator" };
+
+      localStorage.setItem("token", newToken);
+      localStorage.setItem("user", JSON.stringify(updatedUser));
+
+      setToken(newToken);
+      setUser(updatedUser);
+      setIsEducator(true);
+
+      navigate("/educator");
+
+    } catch (error) {
+      console.log(error.response?.data || error);
+      alert("Failed to upgrade to educator.");
     }
-    //Logout function
-    const logout=()=>{
-        setUser(null)
-        setToken(null)
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
+  };
+
+  // -----------------------------
+  // LOAD USER FROM LOCALSTORAGE
+  // -----------------------------
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    const storedToken = localStorage.getItem("token");
+
+    if (storedToken) setToken(storedToken);
+
+    if (storedUser) {
+      const parsed = JSON.parse(storedUser);
+      setUser(parsed);
+      setIsEducator(parsed?.role === "educator");
     }
-
-    // Fetch all courses 
-    const fetchAllCourses = ()=>{
-      setAllCourses(dummyCourses)
-    }
-
-    const userEnrolledCourses = async()=>{
-      setEnrolledCourses(dummyCourses)
-    }
+  }, []);
 
 
-    // Fucntion to calculate average rating of course 
-    const averageRating = (course)=>{
-        if(course.courseRatings.length===0){
-          return 0
-        }
-
-        let totalRatings = 0 
-        course.courseRatings.forEach(rating => {
-          totalRatings+=rating.rating
-        })
-
-        return totalRatings/course.courseRatings.length
+  const fetchAllCourses = async()=>{
+    try{
+      const {data} = await axios.get(`${backend_Url}/api/course/all`)
+      if(data.success){
+        setAllCourses(data.course)
+      }
+      else{
+        toast.error(data.message)
       }
 
-    useEffect(()=>{
-      fetchAllCourses(),
-      userEnrolledCourses()
-    },[])
-
-
-    // Function to calculate course chapter time 
-    const calculateChapterTime = (chapter)=>{
-      let time = 0
-      chapter.chapterContent.map((value)=> time+=value.lectureDuration)
-      return humanizeDuration(time*60*100,{units:['h','m']})
     }
-    
-    // function to calculate course duration 
-    const calculateCourseDuration = (course)=>{
-      let time = 0 
-
-      course.courseContent.map((chapter)=>chapter.chapterContent.map((value)=> time+=value.lectureDuration))
-
-      return humanizeDuration(time*60*100,{units:['h','m']})
+    catch(error){
+      console.log(error)
+      toast.error(toast.message)
     }
+  }
 
-    // fucntion to calculate total number of lectures 
-    const calculateTotalLectures = (course)=>{
-      let totalLectures=0
-      course.courseContent.map((value)=> totalLectures+=value.chapterContent.length)
-    }
-
-
+  useEffect(() => {
+    setEnrolledCourses(dummyCourses);
+    fetchAllCourses()
+  }, []);
 
 
-    useEffect(() => {
-        const storedUser = localStorage.getItem("user");
-        const storedToken = localStorage.getItem("token");
-      
-        if (storedToken) {
-          setToken(storedToken);
-        }
-      
-        if (storedUser && storedUser !== "undefined") {
-          try {
-            const parsedUser = JSON.parse(storedUser);
-            setUser(parsedUser);
-          } catch (err) {
-            console.error("Invalid user JSON in localStorage:", err);
-            localStorage.removeItem("user");
-          }
-        }
-      }, []);
-    const value={
-        user,token,login,logout, isAuthenticated: !!token,backend_Url,currency,allCourses,averageRating,isEducator,calculateChapterTime,calculateCourseDuration,calculateTotalLectures,enrolledCourse
-    }
+  const averageRating = (course) => {
+    if (!course.courseRatings.length) return 0;
+    let total = 0;
+    course.courseRatings.forEach((r) => (total += r.rating));
+    return total / course.courseRatings.length;
+  };
 
-    return(
-        <AppContext.Provider value={value}>
-            {props.children}
-        </AppContext.Provider>
-    )
+  const calculateChapterTime = (chapter) => {
+    let time = 0;
+    chapter.chapterContent.forEach((lec) => (time += lec.lectureDuration));
+    return humanizeDuration(time * 60 * 1000, { units: ["h", "m"] });
+  };
 
-}
+  const calculateCourseDuration = (course) => {
+    let time = 0;
+    course.courseContent.forEach((ch) =>
+      ch.chapterContent.forEach((lec) => (time += lec.lectureDuration))
+    );
+    return humanizeDuration(time * 60 * 1000, { units: ["h", "m"] });
+  };
+
+  const calculateTotalLectures = (course) => {
+    let total = 0;
+    course.courseContent.forEach(
+      (ch) => (total += ch.chapterContent.length)
+    );
+    return total;
+  };
+
+  // -----------------------------
+  // FINAL PROVIDED VALUE
+  // -----------------------------
+  const value = {
+    user,
+    token,
+    backend_Url,
+    currency,
+    login,
+    logout,
+    isAuthenticated: !!token,
+    isEducator,
+    becomeEducator,
+    allCourses,
+    enrolledCourses,
+    averageRating,
+    calculateChapterTime,
+    calculateCourseDuration,
+    calculateTotalLectures,
+  };
+
+  return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
+};
