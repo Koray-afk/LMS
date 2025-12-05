@@ -28,12 +28,12 @@ function CourseCard({ course }) {
         {course.courseTitle}
       </h3>
   
-      <p className="text-sm text-gray-500">Koray Cerragil</p>
+      <p className="text-sm text-gray-500">{course.educator?.name || 'Unknown Educator'}</p>
   
       <div className="flex items-center gap-2 text-sm text-yellow-500">
-        <p className="font-semibold">4.5</p>
+        <p className="font-semibold">{course.courseRating?.length > 0 ? (course.courseRating.reduce((sum, r) => sum + r.rating, 0) / course.courseRating.length / 20).toFixed(1) : 'N/A'}</p>
         <div>⭐⭐⭐⭐⭐</div>
-        <p className="text-gray-500">(22)</p>
+        <p className="text-gray-500">({course.courseRating?.length || 0})</p>
       </div>
   
       <p className="text-xl font-bold text-blue-600 mt-2">

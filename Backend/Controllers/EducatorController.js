@@ -59,7 +59,7 @@ exports.educatorDashbboardData = async (req,res)=>{
         for(const course of courses){
           const students = await User.find({
             _id:{$in:course.enrolledStudents}
-          },'name','imageUrl')
+          }, 'name imageUrl')
 
           students.forEach(student=>{
             ernrolledStudensData.push({
@@ -75,7 +75,7 @@ exports.educatorDashbboardData = async (req,res)=>{
     }
     catch(error){
       console.log(error)
-      return res.status(500).json({success:true,message:error})
+      return res.status(500).json({success:false,message:error.message})
     }
 }
 

@@ -5,13 +5,15 @@ import Loading from "../../Components/student/Loading";
 import { assets } from "../../assets/assets";
 import humanizeDuration from "humanize-duration";
 import YouTube from "react-youtube";
+import axios from "axios";
+import { toast } from "react-toastify";
 
 function CourseDetails() {
   const { id } = useParams();
 
   // Correct context usage
   const {
-    allCourses,
+    backend_Url,
     calculateChapterTime,
     calculateCourseDuration,
     calculateTotalLectures,
@@ -19,12 +21,31 @@ function CourseDetails() {
 
   const [courseData, setCourseData] = useState(null);
   const [openSection, setOpenSection] = useState({}); 
-  const [isAlreadyEnrolled,setisAlreadyEnrolled]=useState(false)
-  const [playerData,setPlayerData]=useState(null)
+  const [isAlreadyEnrolled, setisAlreadyEnrolled] = useState(false);
+  const [playerData, setPlayerData] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const fetchCourseData = async () => {
-    const findCourse = allCourses.find((value) => value._id === id);
-    setCourseData(findCourse);
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      const { data } = await axios.get(`${backend_Url}/api/course/${id}`);
+      
+      if (data.success) {
+        setCourseData(data.courseData);
+      } else {
+        setError(data.message || "Failed to load course");
+        toast.error(data.message || "Failed to load course");
+      }
+    } catch (error) {
+      console.error(error);
+      setError(error.response?.data?.message || "Failed to load course details");
+      toast.error(error.response?.data?.message || "Failed to load course details");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const toggleSection = (index) => {
@@ -36,7 +57,23 @@ function CourseDetails() {
 
   useEffect(() => {
     fetchCourseData();
-  }, [courseData]);
+  }, [id]);
+
+  if (isLoading) return <Loading />;
+  
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen">
+        <p className="text-xl text-red-600 mb-4">Error: {error}</p>
+        <button
+          onClick={() => window.location.reload()}
+          className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
 
   if (!courseData) return <Loading />;
 
@@ -60,13 +97,15 @@ function CourseDetails() {
         {/* Ratings */}
         <div className="flex items-center gap-3 mt-4 text-sm">
           <p className="font-semibold text-yellow-500 text-lg">
-            4.5
+            {courseData.courseRating?.length > 0
+              ? (courseData.courseRating.reduce((sum, r) => sum + r.rating, 0) / courseData.courseRating.length / 20).toFixed(1)
+              : 'N/A'}
           </p>
           <span className="text-yellow-500 text-lg">⭐</span>
-          <p className="text-gray-500">(22 ratings)</p>
+          <p className="text-gray-500">({courseData.courseRating?.length || 0} ratings)</p>
           <p className="text-gray-700">
-            {courseData.enrolledStudents.length}{" "}
-            {courseData.enrolledStudents.length > 1
+            {courseData.enrolledStudents?.length || 0}{" "}
+            {courseData.enrolledStudents?.length !== 1
               ? "students"
               : "student"}
           </p>
@@ -74,7 +113,7 @@ function CourseDetails() {
 
         {/* Instructor */}
         <p className="text-gray-700 mt-2 text-base">
-          Course by <span className="font-semibold">Koray Cerragil</span>
+          Course by <span className="font-semibold">{courseData.educator?.name || 'Unknown Educator'}</span>
         </p>
             
           {/* Course Section */}
@@ -135,14 +174,14 @@ function CourseDetails() {
 
                           <div  className="flex gap-4 text-sm text-gray-500 mt-1 cursor-pointer">
                             {lecture.isPreviewFree && (
-                              <p onClick={()=>setPlayerData({videoId:lecture.lectureUrl.split('/').pop()})} className="text-green-600 font-semibold">
+                              <p onClick={() => setPlayerData({videoId: lecture.lectureUrl.split('/').pop()})} className="text-green-600 font-semibold">
                                 Preview
                               </p>
                             )}
 
                             <p>
                               {humanizeDuration(
-                                lecture.lectureDuration *60 * 100, // FIXED
+                                lecture.lectureDuration * 60 * 1000,
                                 { units: ["h", "m"], round: true }
                               )}
                             </p>
@@ -189,8 +228,13 @@ function CourseDetails() {
       {/* 💲 Pricing Section */}
       <div className="mb-4">
         <p className="text-3xl font-bold text-gray-900">
-          ${courseData.discount}
+          ${(courseData.coursePrice - (courseData.coursePrice * courseData.discount / 100)).toFixed(2)}
         </p>
+        {courseData.discount > 0 && (
+          <p className="text-lg text-gray-500 line-through">
+            ${parseFloat(courseData.coursePrice).toFixed(2)}
+          </p>
+        )}
       </div>
 
 
@@ -198,7 +242,11 @@ function CourseDetails() {
 
         <div className="flex items-center gap-1">
           <span className="text-red-500 text-lg">★</span>
-          <span>4.5</span>
+          <span>
+            {courseData.courseRating?.length > 0
+              ? (courseData.courseRating.reduce((sum, r) => sum + r.rating, 0) / courseData.courseRating.length / 20).toFixed(1)
+              : 'N/A'}
+          </span>
         </div>
 
         <div className="flex items-center gap-1">

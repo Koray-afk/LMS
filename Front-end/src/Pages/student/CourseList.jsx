@@ -17,6 +17,7 @@ function CourseList() {
   const keyword = typeof input === "string" ? input.toLowerCase() : "";
 
   const [filterCourse, setFilterCourse] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     if (allCourses && allCourses.length > 0) {
@@ -31,6 +32,9 @@ function CourseList() {
       } else {
         setFilterCourse(temp);
       }
+      setIsLoading(false);
+    } else if (allCourses && allCourses.length === 0) {
+      setIsLoading(false);
     }
   }, [keyword, allCourses]);
 
@@ -75,11 +79,37 @@ function CourseList() {
   </div>
 )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 my-16 gap-3 p-2 md:p-2">
-      {
-        filterCourse.map((value,index)=> <CourseCard key={index} course={value}/>)
-      }
-      </div>
+
+      {/* Loading State */}
+      {isLoading ? (
+        <div className="flex justify-center items-center my-16">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        </div>
+      ) : filterCourse.length > 0 ? (
+        /* Course Grid */
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 my-16 gap-3 p-2 md:p-2">
+          {filterCourse.map((value, index) => (
+            <CourseCard key={value._id || index} course={value} />
+          ))}
+        </div>
+      ) : (
+        /* Empty State */
+        <div className="flex flex-col items-center justify-center my-16 text-center">
+          <p className="text-xl text-gray-600 mb-2">No courses found</p>
+          <p className="text-sm text-gray-400">
+            {keyword ? `No courses match "${input}"` : "No courses available at the moment"}
+          </p>
+          {keyword && (
+            <button
+              onClick={() => navigate('/courseList')}
+              className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+            >
+              View All Courses
+            </button>
+          )}
+        </div>
+      )}
+
 
     </div>
   );
